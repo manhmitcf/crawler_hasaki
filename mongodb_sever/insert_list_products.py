@@ -1,4 +1,4 @@
-
+from pymongo import MongoClient
 def insert_products_to_mongodb_sever(products, db_name, collection_name, client):
     """
     Chèn danh sách sản phẩm vào MongoDB
@@ -15,7 +15,6 @@ def insert_products_to_mongodb_sever(products, db_name, collection_name, client)
     except Exception as e:
         print(f"Lỗi khi chèn sản phẩm: {e}")
 if __name__ == "__main__":
-    from pymongo import MongoClient
     # Ví dụ sử dụng
     products = [
         {"name": "Sản phẩm 1", "link": "https://example.com/product1"},
