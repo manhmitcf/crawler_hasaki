@@ -13,9 +13,21 @@ class CrawlProduct:
         self.products = [] 
         self.url = None
         self.id = None
-        self.headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-            'Accept-Language': 'vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7',
+        self.user_agents = [
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0",
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.1 Safari/605.1.15",
+            "Mozilla/5.0 (Linux; Android 10; SM-G973F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0"
+        ]
+    def get_random_headers(self):
+        """Sinh headers với User-Agent ngẫu nhiên"""
+        return {
+            'User-Agent': random.choice(self.user_agents),
+            'Accept-Language': 'vi-VN,vi;q=0.9,en;q=0.8',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'Referer': 'https://www.google.com/',
+            'Connection': 'keep-alive',
         }
     def get_page_content(self):
         """
@@ -27,7 +39,7 @@ class CrawlProduct:
             BeautifulSoup: Đối tượng BeautifulSoup chứa nội dung trang
         """
         try:
-            response = requests.get(self.url, headers=self.headers)
+            response = requests.get(self.url, headers=self.get_random_headers())
             response.raise_for_status()  # Kiểm tra lỗi HTTP
             return BeautifulSoup(response.text, 'html.parser')
         except requests.exceptions.RequestException as e:
@@ -131,7 +143,6 @@ class CrawlProduct:
 if __name__ == "__main__":
     with open('data/list_products1.json', 'r', encoding='utf-8') as f:
         products_list = json.load(f)
-    print("Đã tải danh sách sản phẩm từ file products_list.json")
     print("Đang bắt đầu thu thập sản phẩm...")
 
 
