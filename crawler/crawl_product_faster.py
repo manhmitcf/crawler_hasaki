@@ -9,6 +9,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 from selenium_stealth import stealth
 from multiprocessing import Pool
+import os
 def get_page_content(url):
     """
     Lấy nội dung trang web bằng Selenium.
@@ -166,7 +167,7 @@ def main():
 
     # Bắt đầu quá trình thu thập dữ liệu
     print("Bắt đầu thu thập dữ liệu sản phẩm ...")
-    crawler.process_multiple_products(batch_size=12)  
+    crawler.process_multiple_products(batch_size=os.cpu_count())  
     # Lấy danh sách sản phẩm đã thu thập
     products = crawler.return_list_products()
     print(f"Đã thu thập {len(products)} sản phẩm")
