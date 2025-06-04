@@ -3,9 +3,9 @@ from bs4 import BeautifulSoup
 import json
 import time
 import random
-import os
 from urllib.parse import urljoin
-from .get_number_of_pages import get_number_of_pages, get_number_of_products
+from web_scraper.get_number_of_pages import get_number_of_products, get_number_of_pages
+import os
 
 class ProductScraper:
     def __init__(self, base_url, output_file="products.json", number_of_products=None, number_of_pages=None):
@@ -62,7 +62,7 @@ class ProductScraper:
         except requests.exceptions.RequestException as e:
             print(f"Lỗi khi tải trang {url}: {e}")
             return None
-    def extract_products(self, soup, product_selector, name_selector, link_selector=None):
+    def extract_products(self, soup, product_selector,link_selector=None, page =1):
         """
         Trích xuất thông tin sản phẩm từ nội dung HTML
         
@@ -86,33 +86,8 @@ class ProductScraper:
                 data_id = product.select_one('.block_info_item_sp').get('data-id', '')
                 data_name = product.select_one('.block_info_item_sp').get('data-name', '')
                 data_category_name = product.select_one('.block_info_item_sp').get('data-category-name', '')
-                data_price = product.select_one('.block_info_item_sp').get('data-price', '')
                 data_variant = product.select_one('.block_info_item_sp').get('data-variant', '')
-                data_brand = product.select_one('.block_info_item_sp').get('data-brand', '')
-            # Giá mới:
-            new_price = product.select_one('.item_giamoi')
-            if new_price:
-                price = new_price.get_text(strip=True)
-            else:
-                price = "Không có giá mới"
-            #Giá cũ:
-            old_price = product.select_one('.item_giacu')
-            if old_price:
-                old_price = old_price.get_text(strip=True)
-            else:
-                old_price = "Không có giá cũ"
-            #Giảm giá:
-            discount = product.select_one('.discount_percent2_deal')
-            if discount:
-                discount = discount.get_text(strip=True)
-            else:
-                discount = "Không có giảm giá"
-            # Tên Tiếng Việt:
-            namevn_element = product.select_one(name_selector)
-            namevn = namevn_element.get_text(strip=True) if namevn_element else "Không có tên"
-            # Tên Tiếng Anh:
-            nameen_element = product.select_one('.en_names')
-            nameen = nameen_element.get_text(strip=True) if nameen_element else "Không có tên tiếng Anh"
+        
 
             # Trích xuất link sản phẩm
             link = "Không có link"
@@ -126,35 +101,35 @@ class ProductScraper:
             stock_element = product.select_one('.block_info_hethang a, .block_info_hethang span')
             if stock_element:
                 stock_info = stock_element.get_text(strip=True)
-            
+            # Số đơn hàng đã bán
+            try:
+                item_count_by = product.select_one('.item_count_by').get_text(strip=True)
+            except Exception as e:
+                item_count_by = "Không có thông tin số đơn hàng đã bán"
+
             products.append({
                 'data_id': data_id,
                 'id': id,
                 'data_product': data_product,
                 'data_name': data_name,
                 'data_category_name': data_category_name,
-                'data_price': data_price,
                 'data_variant': data_variant,   
-                'data_brand': data_brand,
-                'namevn': namevn,
-                'nameen': nameen,
-                'price': price,
-                'old_price': old_price,
-                'discount': discount,
+                'item_count_by': item_count_by,
+                'page' : page,
                 'link': link,
                 'stock_info': stock_info    
             })
         
         return products
-    def scrape_products(self, urls, product_selector, name_selector,link_selector=None):
+    def scrape_products(self, urls, product_selector,link_selector=None):
         """
         Thu thập sản phẩm từ danh sách URLs
         
         Args:
             urls (list): Danh sách URLs cần thu thập
         """
-
-        for url in urls:
+        count = 0
+        for page, url in enumerate(urls, start=1):
             print(f"Đang thu thập từ: {url}")
             soup = self.get_page_content(url)
             
@@ -162,16 +137,15 @@ class ProductScraper:
                 page_products = self.extract_products(
                     soup, 
                     product_selector, 
-                    name_selector, 
-                    link_selector
+                    link_selector, page = page
                 )
                 
                 self.products.extend(page_products)
                 print(f"Đã thu thập {len(page_products)} sản phẩm từ {url}")
                 
                 # Tạm dừng để tránh gây tải cho server
-                time.sleep(random.uniform(1, 3))
-    
+                # time.sleep(random.uniform(1, 3))
+            count += 1
     def save_to_json(self):
         """Lưu dữ liệu sản phẩm vào file JSON"""
         # Tạo thư mục nếu chưa tồn tại
@@ -191,8 +165,8 @@ class ProductScraper:
         return self.products
 if __name__ == "__main__":
     # URL cơ sở và URL danh mục
-    base_url = "https://hasaki.vn/danh-muc/suc-khoe-lam-dep-c3.html?sort=position&p="
-    category_url = "https://hasaki.vn/danh-muc/suc-khoe-lam-dep-c3.html?sort=position"
+    base_url = "https://hasaki.vn/danh-muc/suc-khoe-lam-dep-c3.html?p="
+    category_url = "https://hasaki.vn/danh-muc/suc-khoe-lam-dep-c3.html"
     output_file = "data/list_products.json"
     
     # Lấy số lượng sản phẩm và số trang
@@ -225,14 +199,12 @@ if __name__ == "__main__":
     
     # Định nghĩa các CSS selectors để trích xuất thông tin dựa trên HTML mẫu
     product_selector = ".ProductGridItem__itemOuter"  # Container chứa mỗi sản phẩm
-    name_selector = ".vn_names"     # Thẻ chứa tên sản phẩm
     link_selector = ".v3_thumb_common_sp"   # Thẻ chứa link sản phẩm
     
     # Tiến hành thu thập
     scraper.scrape_products(
         urls_to_scrape,
         product_selector,
-        name_selector,
         link_selector
     )
     

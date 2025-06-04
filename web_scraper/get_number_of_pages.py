@@ -42,13 +42,11 @@ def get_number_of_pages(number_of_products : int) -> int:
     Returns:
         int: Số trang
     """
-    products_per_page = 40  # Giả sử mỗi trang có 40 sản phẩm
+    products_per_page = 40  
     return int(number_of_products / products_per_page) + (1 if number_of_products % products_per_page > 0 else 0)
 
-
 if __name__ == "__main__":
-    url = 'https://hasaki.vn/danh-muc/suc-khoe-lam-dep-c3.html?sort=position'
-    number_of_products = get_number_of_products(url)
-    print(f"Số lượng sản phẩm: {number_of_products}")
-    number_of_pages = get_number_of_pages(number_of_products)
-    print(f"Số trang: {number_of_pages}")
+    url = "https://hasaki.vn/danh-muc/suc-khoe-lam-dep-c3.html"
+    print(get_number_of_pages(get_number_of_products(url)))
+
+    

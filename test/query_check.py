@@ -33,14 +33,14 @@ if __name__ == "__main__":
     client = MongoClient("mongodb://admin:your_secure_password@20.2.235.19:27017/?authSource=admin")
     db = client["hasaki_db"]
     collection = db["product_detail"]
-    print("✅ Kết nối MongoDB thành công!")
+    print("Kết nối MongoDB thành công!")
     # print("Danh sách 100 document đầu tiên:")
     # print_first_100_documents()
     input_id = input("Nhập vào id document: ").strip()
     document = find_document_by_id(input_id)
     if document:
-        print("✅ Tìm thấy document:")
-        print(document)
+        print("Tìm thấy document:")
+        print(document['descriptioninfo'])
     else:
-        print("❌ Không tìm thấy document với id đó.")
+        print("Không tìm thấy document với id đó.")
 

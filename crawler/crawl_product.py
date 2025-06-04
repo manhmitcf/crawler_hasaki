@@ -32,7 +32,7 @@ class CrawlProduct:
             )
 
             driver.get(self.url)
-            WebDriverWait(driver, 10).until(
+            WebDriverWait(driver,10).until(
                 EC.presence_of_element_located((By.ID, 'DescriptionInfo'))
             )
             html = driver.page_source
@@ -127,7 +127,7 @@ class CrawlProduct:
                 self.products.append(product)
                 # Tạm dừng để tránh gây tải cho server
                 count += 1
-                time.sleep(random.uniform(1, 3))
+                # time.sleep(random.uniform(1, 3))
     def return_list_products(self):
         return self.products
 if __name__ == "__main__":

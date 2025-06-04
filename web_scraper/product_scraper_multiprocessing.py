@@ -310,7 +310,7 @@ if __name__ == "__main__":
     # URL cơ sở và URL danh mục
     base_url = "https://hasaki.vn/danh-muc/suc-khoe-lam-dep-c3.html?sort=position&p="
     category_url = "https://hasaki.vn/danh-muc/suc-khoe-lam-dep-c3.html?sort=position"
-    output_file = "data/list_products1.json"
+    output_file = "data/list_products.json"
     
     # Lấy số lượng sản phẩm và số trang
     number_of_products = get_number_of_products(category_url)
