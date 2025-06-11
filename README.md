@@ -23,7 +23,9 @@ crawler_hasaki/
 ├── mongodb_sever/             # Module kết nối MongoDB
 │   └── insert_list_products.py # Chèn dữ liệu vào MongoDB
 ├── main.py                    # File chính để chạy crawler
-└── requirements.txt           # Danh sách thư viện cần thiết
+├── requirements.txt           # Danh sách thư viện cần thiết
+├── .env                       # File cấu hình môi trường (không commit)
+└── .gitignore                 # Danh sách file/folder bỏ qua khi commit
 ```
 
 ## Tính năng
@@ -49,8 +51,18 @@ cd crawler_hasaki
 pip install -r requirements.txt
 ```
 
-3. Cấu hình MongoDB:
-   - Cập nhật connection string trong `main.py`
+3. Cấu hình môi trường:
+   - Tạo file `.env` từ template `.env.example` (nếu có)
+   - Hoặc cập nhật file `.env` với thông tin MongoDB của bạn:
+   ```env
+   MONGODB_USERNAME=your_username
+   MONGODB_PASSWORD=your_password
+   MONGODB_HOST=your_host
+   MONGODB_PORT=27017
+   MONGODB_AUTH_SOURCE=admin
+   MONGODB_DATABASE=hasaki_db
+   MONGODB_URI=mongodb://your_username:your_password@your_host:27017/?authSource=admin
+   ```
    - Đảm bảo MongoDB server đang chạy
 
 ## Sử dụng
@@ -76,14 +88,29 @@ Quá trình sẽ thực hiện theo các bước:
 - **pymongo**: Kết nối MongoDB
 - **requests**: HTTP requests
 - **urllib3**: URL utilities
+- **python-dotenv**: Quản lý biến môi trường từ file .env
 
 ## Cấu hình
 
 ### MongoDB
-Cập nhật connection string trong `main.py`:
-```python
-client = MongoClient("mongodb://admin:your_secure_password@20.2.235.19:27017/?authSource=admin")
+Thông tin kết nối MongoDB được lưu trong file `.env` để bảo mật:
+```env
+# Cấu hình MongoDB
+MONGODB_USERNAME=admin
+MONGODB_PASSWORD=your_secure_password
+MONGODB_HOST=20.2.235.19
+MONGODB_PORT=27017
+MONGODB_AUTH_SOURCE=admin
+MONGODB_DATABASE=hasaki_db
+
+# Connection string đầy đủ
+MONGODB_URI=mongodb://admin:your_secure_password@20.2.235.19:27017/?authSource=admin
 ```
+
+**Lưu ý bảo mật:**
+- File `.env` chứa thông tin nhạy cảm và đã được thêm vào `.gitignore`
+- Không commit file `.env` lên repository
+- Thay đổi mật khẩu mặc định trước khi sử dụng
 
 ### Target URL
 Mặc định crawler sẽ thu thập từ danh mục "Sức khỏe làm đẹp":
@@ -98,4 +125,48 @@ category_url = "https://hasaki.vn/danh-muc/suc-khoe-lam-dep-c3.html"
 - Sử dụng User-Agent để tránh bị block
 - Tự động xử lý các trường hợp lỗi kết nối
 - Hỗ trợ resume từ điểm dừng (kiểm tra collection đã tồn tại)
+
+## Troubleshooting
+
+### Lỗi kết nối MongoDB
+```
+ValueError: MONGODB_URI không được tìm thấy trong file .env
+```
+**Giải pháp:** Kiểm tra file `.env` đã được tạo và chứa biến `MONGODB_URI`
+
+### Lỗi import dotenv
+```
+ModuleNotFoundError: No module named 'dotenv'
+```
+**Giải pháp:** Cài đặt thư viện python-dotenv:
+```bash
+pip install python-dotenv
+```
+
+### Lỗi kết nối MongoDB
+```
+pymongo.errors.ServerSelectionTimeoutError
+```
+**Giải pháp:** 
+- Kiểm tra MongoDB server đang chạy
+- Kiểm tra thông tin kết nối trong file `.env`
+- Kiểm tra firewall và network connectivity
+
+### File .env không được load
+**Giải pháp:**
+- Đảm bảo file `.env` nằm trong thư mục gốc của project
+- Kiểm tra tên file chính xác là `.env` (không có extension)
+- Kiểm tra quyền đọc file
+
+## Đóng góp
+
+1. Fork repository
+2. Tạo feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to branch (`git push origin feature/AmazingFeature`)
+5. Tạo Pull Request
+
+## License
+
+Distributed under the MIT License. See `LICENSE` for more information.
 

@@ -1,4 +1,6 @@
 import time
+import os
+from dotenv import load_dotenv
 from pymongo import MongoClient
 from web_scraper.product_scraper import ProductScraper
 from web_scraper.get_number_of_pages import get_number_of_products, get_number_of_pages
@@ -7,13 +9,22 @@ from mongodb_sever.insert_list_products import insert_products_to_mongodb_sever
 from crawler.crawl_product_API import CrawlProduct
 from pymongo.errors import CollectionInvalid
 
+# Load environment variables from .env file
+load_dotenv()
+
 def main():
     start_time = time.time()
 
     try:
         # ====== 1. KẾT NỐI DATABASE ======
-        client = MongoClient("mongodb://admin:your_secure_password@20.2.235.19:27017/?authSource=admin")
-        db = client["hasaki_db"]
+        mongodb_uri = os.getenv('MONGODB_URI')
+        database_name = os.getenv('MONGODB_DATABASE', 'hasaki_db')
+        
+        if not mongodb_uri:
+            raise ValueError("MONGODB_URI không được tìm thấy trong file .env")
+            
+        client = MongoClient(mongodb_uri)
+        db = client[database_name]
         if "products" not in db.list_collection_names():
             # ====== 2. PHÂN TÍCH DANH MỤC & TẠO URL ======
             base_url = "https://hasaki.vn/danh-muc/suc-khoe-lam-dep-c3.html?p="
@@ -45,7 +56,7 @@ def main():
             # ====== 4. INSERT VÀO MONGODB (products) ======
             products = scraper.return_products()
             print(f"Đã thu thập {len(products)} sản phẩm từ danh mục")
-            insert_products_to_mongodb_sever(products, "hasaki_db", "products", client)
+            insert_products_to_mongodb_sever(products, database_name, "products", client)
         else:
             print("Collection 'products' đã tồn tại, bỏ qua tạo mới.")
             # ====== 5. GỌI API CHI TIẾT SẢN PHẨM ======
@@ -62,7 +73,7 @@ def main():
                 print("Đã tạo collection 'product_detail'.")
             except CollectionInvalid:
                 print("Collection 'product_detail' đã tồn tại, bỏ qua tạo mới.")
-            insert_products_to_mongodb_sever(detail_products, "hasaki_db", "product_detail", client)
+            insert_products_to_mongodb_sever(detail_products, database_name, "product_detail", client)
 
             # ====== 7. TỔNG KẾT ======
             client.close()

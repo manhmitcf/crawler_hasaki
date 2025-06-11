@@ -1,6 +1,5 @@
-beautifulsoup4
-selenium
-selenium-stealth
 pymongo
+python-dotenv
 requests
-urllib3
+beautifulsoup4
+lxml
